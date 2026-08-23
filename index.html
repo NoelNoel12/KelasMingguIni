@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kelas Minggu Ini</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kelas Minggu Ini">
+<meta name="theme-color" content="#0d0b1e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#0d0b1e;
+    --bg-deep:#07061452;
+    --panel:#1b1735;
+    --panel-alt:#241f47;
+    --panel-sunken:#141230;
+    --ink:#f4f1ff;
+    --ink-dim:#9a92c9;
+    --ink-faint:#655f96;
+    --line:#4a3f8f;
+    --accent:#38e8c6;
+    --accent-ink:#062420;
+    --accent-2:#ff5da2;
+    --accent-2-ink:#2a0416;
+    --accent-3:#ffd447;
+    --accent-3-ink:#2e2200;
+    --live:#ff6b4a;
+    --free:#332d5c;
+    --shadow-hard:#040311;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Pixelify Sans", "Courier New", monospace;
+    font-weight:500;
+    line-height:1.6;
+    position:relative;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{ font-family:"Press Start 2P", "Pixelify Sans", monospace; text-wrap:balance; margin:0; line-height:1.5; }
+  .vt{ font-family:"VT323", monospace; font-variant-numeric:tabular-nums; }
+  ::selection{ background:var(--accent); color:var(--accent-ink); }
+  button,input,select{ font:inherit; color:inherit; }
+  :focus-visible{ outline:3px solid var(--accent-3); outline-offset:2px; }
+
+  /* CRT scanline overlay */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.22) 0px,
+      rgba(0,0,0,0.22) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events:none;
+    z-index:200;
+    mix-blend-mode:multiply;
+    opacity:0.35;
+  }
+  body::after{
+    content:"";
+    position:fixed; inset:0;
+    background:radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 130%);
+    pointer-events:none;
+    z-index:199;
+  }
+  @keyframes flicker{ 0%,100%{opacity:1;} 50%{opacity:0.985;} }
+  .app{ animation:flicker 6s steps(2) infinite; }
+  @media (prefers-reduced-motion: reduce){ .app{ animation:none; } }
+
+  .app{
+    display:grid;
+    grid-template-columns: 312px 1fr;
+    min-height:100vh;
+    max-width:1220px;
+    margin:0 auto;
+    position:relative;
+    z-index:1;
+  }
+  .app > *{ min-width:0; }
+
+  /* pixel chunky panel look, used everywhere */
+  .pxl{
+    background:var(--panel);
+    border:3px solid var(--line);
+    box-shadow:4px 4px 0 var(--shadow-hard);
+  }
+  .pxl-btn{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:"Pixelify Sans", monospace;
+    font-weight:700;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    background:var(--panel-alt);
+    color:var(--ink);
+    border:3px solid var(--line);
+    padding:9px 11px;
+    cursor:pointer;
+    box-shadow:3px 3px 0 var(--shadow-hard);
+    text-decoration:none;
+    white-space:nowrap;
+  }
+  .pxl-btn:hover{ background:#2c2657; }
+  .pxl-btn:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--shadow-hard); }
+  .pxl-btn.accent{ background:var(--accent-2); color:var(--accent-2-ink); border-color:var(--accent-2-ink); }
+  .pxl-btn.accent:hover{ filter:brightness(1.08); }
+  .pxl-btn.ghost{ background:var(--panel-sunken); }
+  .pxl-btn.small{ padding:6px 8px; font-size:9.5px; }
+
+  input[type="text"], input[type="date"], select{
+    font-family:"Pixelify Sans", monospace;
+    font-size:11.5px;
+    background:var(--panel-sunken);
+    color:var(--ink);
+    border:2px solid var(--line);
+    padding:8px 9px;
+    border-radius:0;
+  }
+  input[type="text"]::placeholder{ color:var(--ink-faint); }
+  select{ cursor:pointer; }
+
+  /* ---------- RAIL ---------- */
+  .rail{
+    padding:26px 20px 26px 26px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    border-right:3px solid var(--line);
+    min-width:0;
+  }
+  .brand-eyebrow{
+    font-family:"Pixelify Sans",monospace;
+    font-size:9.5px;
+    font-weight:700;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--accent);
+  }
+  .brand-title{
+    font-size:19px;
+    margin-top:8px;
+    color:var(--ink);
+    letter-spacing:0.02em;
+  }
+  .brand-title .hi{ color:var(--accent-3); }
+
+  .week-stats{ display:flex; gap:10px; }
+  .stat{ flex:1; padding:10px 10px; text-align:center; }
+  .stat .num{ font-family:"VT323",monospace; font-size:28px; color:var(--accent-3); line-height:1; }
+  .stat .label{ font-size:8px; color:var(--ink-dim); letter-spacing:0.05em; margin-top:5px; text-transform:uppercase; }
+
+  .day-tabs{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .day-tab{
+    display:flex; align-items:center; gap:10px;
+    padding:9px 10px;
+    background:var(--panel-sunken);
+    border:2px solid var(--line);
+    cursor:pointer; text-align:left; width:100%;
+  }
+  .day-tab:hover{ background:var(--panel-alt); }
+  .day-tab .dot{ width:9px;height:9px; background:var(--free); flex-shrink:0; }
+  .day-tab.has-class .dot{ background:var(--accent); box-shadow:0 0 0 2px var(--panel-sunken), 0 0 6px var(--accent); }
+  .day-tab .name{ font-size:11px; flex:1; letter-spacing:0.02em; }
+  .day-tab .count{ font-size:9px; color:var(--ink-faint); font-family:"VT323",monospace; font-size:13px; }
+  .day-tab.is-today{ box-shadow:0 0 0 2px var(--accent-3); }
+  .day-tab.active{ background:var(--accent); border-color:var(--accent-ink); }
+  .day-tab.active .name{ color:var(--accent-ink); font-weight:700; }
+  .day-tab.active .count{ color:var(--accent-ink); }
+  .day-tab.active .dot{ background:var(--accent-ink); box-shadow:none; }
+  .today-flag{ font-size:7.5px; background:var(--accent-3); color:var(--accent-3-ink); padding:2px 4px; margin-left:4px; }
+
+  .next-up{ padding:13px 14px; }
+  .next-up .tag{
+    font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--ink-dim); display:flex; align-items:center; gap:6px;
+  }
+  .tag .pulse, .live-tag .pulse{
+    width:7px;height:7px; background:var(--live); flex-shrink:0;
+    animation:blink 1s steps(1) infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0.15; } }
+  .next-up .course{ font-size:13px; margin-top:8px; color:var(--ink); }
+  .next-up .meta{ font-size:15px; color:var(--accent-3); margin-top:4px; font-family:"VT323",monospace; }
+
+  .reminder-box{ padding:13px 14px; }
+  .reminder-box .row1{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .reminder-box .title{ font-size:10px; letter-spacing:0.04em; }
+  .switch{
+    width:38px; height:20px; background:var(--panel-sunken); border:2px solid var(--line);
+    position:relative; cursor:pointer; flex-shrink:0;
+  }
+  .switch .knob{ position:absolute; top:1px; left:1px; width:14px; height:14px; background:var(--ink-faint); }
+  .switch.on{ background:var(--accent); border-color:var(--accent-ink); }
+  .switch.on .knob{ left:auto; right:1px; background:var(--accent-ink); }
+  .reminder-box .sub{ margin-top:10px; display:flex; align-items:center; gap:8px; font-size:10px; color:var(--ink-dim); }
+  .reminder-box select{ padding:5px 6px; font-size:10px; }
+  .reminder-box .status{ margin-top:8px; font-size:9.5px; color:var(--ink-faint); line-height:1.5; }
+  .reminder-box .status.ok{ color:var(--accent); }
+  .reminder-box .status.no{ color:var(--live); }
+
+  .note-badge{
+    margin-top:auto; padding:12px 13px;
+    font-size:10px; color:var(--ink-dim); line-height:1.6; display:flex; gap:9px;
+  }
+  .note-badge .mark{ flex-shrink:0; color:var(--accent-3); font-family:"VT323",monospace; font-size:16px; }
+  .note-badge b{ color:var(--ink); }
+
+  /* ---------- STAGE ---------- */
+  .stage{ padding:32px 36px 44px; min-width:0; }
+  .day-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
+  .day-head h1{ font-size:26px; color:var(--ink); }
+  .day-head .sub{ font-size:11px; color:var(--ink-dim); margin-top:8px; letter-spacing:0.03em; }
+  .day-head .sks-total{ font-family:"VT323",monospace; font-size:16px; color:var(--ink-dim); white-space:nowrap; }
+  .day-head .sks-total b{ color:var(--accent-3); font-size:22px; }
+
+  .timeline{ display:flex; flex-direction:column; gap:16px; }
+
+  .card{ padding:15px 16px; position:relative; }
+  .card.ongoing{ border-color:var(--live); box-shadow:4px 4px 0 var(--live); }
+  .card .top{ display:flex; justify-content:space-between; gap:10px 14px; align-items:center; flex-wrap:wrap; }
+  .card .time-badge{
+    font-family:"VT323",monospace; font-size:19px; line-height:1;
+    background:var(--panel-sunken); color:var(--accent);
+    border:2px solid var(--accent); padding:5px 10px;
+    white-space:nowrap;
+  }
+  .card h3{ font-size:13.5px; line-height:1.5; color:var(--ink); margin-top:11px; }
+  .card .sks{ flex-shrink:0; font-family:"VT323",monospace; font-size:15px; background:var(--accent-3); color:var(--accent-3-ink); border:2px solid var(--accent-3-ink); padding:2px 8px; white-space:nowrap; margin-left:auto; }
+  .card .details{ margin-top:12px; display:flex; flex-wrap:wrap; gap:7px 18px; font-size:11.5px; color:var(--ink-dim); }
+  .card .details span{ display:flex; align-items:center; gap:6px; }
+  .card .details b{ color:var(--ink); font-weight:400; }
+  .card .actions{ margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
+  .card .live-slot:empty{ display:none; }
+  .card .live-tag{ display:inline-flex; align-items:center; gap:6px; font-size:9.5px; font-weight:700; letter-spacing:0.05em; color:var(--live); margin-top:10px; }
+  .progress{ margin-top:7px; height:8px; background:var(--panel-sunken); border:2px solid var(--line); overflow:hidden; }
+  .progress > i{ display:block; height:100%; background:var(--live); }
+
+  /* tasks */
+  .tasks{ margin-top:14px; border-top:2px dashed var(--line); padding-top:12px; }
+  .tasks .thead{ display:flex; align-items:center; justify-content:space-between; margin-bottom:9px; }
+  .tasks .thead .label{ font-size:9.5px; letter-spacing:0.08em; color:var(--ink-dim); }
+  .tasks .thead .ratio{ font-family:"VT323",monospace; font-size:14px; color:var(--accent-3); }
+  .task-row{ display:flex; align-items:center; gap:9px; padding:6px 0; }
+  .pixel-check{
+    width:18px;height:18px; border:2px solid var(--line); background:var(--panel-sunken);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+    font-family:"VT323",monospace; font-size:14px; color:var(--accent);
+  }
+  .pixel-check.done{ background:var(--accent); color:var(--accent-ink); }
+  .task-text{ flex:1; font-size:11.5px; color:var(--ink); }
+  .task-row.done .task-text{ color:var(--ink-faint); text-decoration:line-through; }
+  .task-due{ font-family:"VT323",monospace; font-size:13px; color:var(--ink-dim); white-space:nowrap; }
+  .task-due.overdue{ color:var(--live); }
+  .task-del{ background:none; border:none; color:var(--ink-faint); cursor:pointer; font-size:14px; padding:2px 4px; flex-shrink:0; }
+  .task-del:hover{ color:var(--live); }
+  .task-empty{ font-size:10.5px; color:var(--ink-faint); padding:4px 0 8px; }
+  .task-add{ display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .task-add input[type="text"]{ flex:1; min-width:120px; }
+  .task-add input[type="date"]{ width:132px; }
+
+  .empty{ padding:56px 10px 30px; text-align:center; color:var(--ink-dim); }
+  .empty .glyph{ font-family:"VT323",monospace; font-size:52px; color:var(--accent); margin-bottom:10px; letter-spacing:6px; }
+  .empty h2{ font-size:15px; color:var(--ink); margin-bottom:10px; }
+  .empty p{ font-size:11.5px; max-width:340px; margin:0 auto; line-height:1.7; }
+
+  /* toast */
+  #toastLayer{ position:fixed; top:18px; right:18px; z-index:300; display:flex; flex-direction:column; gap:10px; max-width:300px; }
+  .toast{ padding:13px 14px; }
+  .toast .t1{ font-size:9.5px; color:var(--accent-3); letter-spacing:0.06em; display:flex; align-items:center; gap:6px; }
+  .toast .t2{ font-size:12px; color:var(--ink); margin-top:7px; }
+  .toast .t3{ font-family:"VT323",monospace; font-size:15px; color:var(--ink-dim); margin-top:3px; }
+  .toast .close{ position:absolute; }
+
+  /* tutorial */
+  .howto{ margin-top:34px; padding-top:24px; border-top:3px solid var(--line); }
+  .howto h2{ font-size:15px; color:var(--ink); margin-bottom:16px; }
+  .howto .cols{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .howto .block{ padding:16px 17px; }
+  .howto .block .htag{ font-size:9.5px; color:var(--accent-3); letter-spacing:0.08em; margin-bottom:9px; }
+  .howto .block ol{ margin:0; padding-left:18px; font-size:12px; color:var(--ink-dim); line-height:1.85; }
+  .howto .block ol li b{ color:var(--ink); font-weight:400; }
+  .howto .block .warn{ margin-top:10px; font-size:10.5px; color:var(--live); line-height:1.6; }
+  .howto .block .ok-note{ margin-top:10px; font-size:10.5px; color:var(--accent); line-height:1.6; }
+
+  @media (max-width: 780px){
+    .app{ grid-template-columns:1fr; }
+    .rail{ border-right:none; border-bottom:3px solid var(--line); padding:20px 16px; gap:14px; }
+    .day-tabs{
+      flex-direction:row; overflow-x:auto; gap:7px; padding-bottom:6px;
+      scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;
+    }
+    .day-tab{ width:auto; flex-shrink:0; scroll-snap-align:start; padding:12px 13px; }
+    .note-badge{ margin-top:0; }
+    .stage{ padding:22px 16px 32px; }
+    .day-head h1{ font-size:20px; }
+    .card .top{ gap:10px; }
+    .card .sks{ margin-left:0; }
+    .howto .cols{ grid-template-columns:1fr; }
+    #toastLayer{ left:12px; right:12px; max-width:none; }
+  }
+
+  /* touch-friendly hit areas + tap feedback on every device */
+  .day-tab, .pxl-btn, .switch, .pixel-check, .task-del, select, input[type="text"], input[type="date"]{
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .day-tab, .pxl-btn, .switch, .pixel-check{ user-select:none; -webkit-user-select:none; }
+  .day-tab{ min-height:44px; }
+  .pxl-btn{ min-height:40px; }
+  .switch{ width:46px; height:26px; }
+  .switch .knob{ width:18px; height:18px; top:3px; }
+  .pixel-check{ width:22px; height:22px; font-size:16px; }
+  .task-del{ min-width:32px; min-height:32px; font-size:17px; }
+  @media (hover:hover){
+    .day-tab:hover, .pxl-btn:hover{ filter:brightness(1.08); }
+  }
+  @media (hover:none){
+    .day-tab:active, .pxl-btn:active{ filter:brightness(1.15); }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail">
+    <div>
+      <div class="brand-eyebrow">&gt; JADWAL_MINGGUAN.EXE</div>
+      <h1 class="brand-title">KELAS <span class="hi">MINGGU INI</span></h1>
+    </div>
+
+    <div class="week-stats pxl">
+      <div class="stat">
+        <div class="num" id="statSks">21</div>
+        <div class="label">SKS/Minggu</div>
+      </div>
+      <div class="stat">
+        <div class="num" id="statHari">4</div>
+        <div class="label">Hari Kuliah</div>
+      </div>
+    </div>
+
+    <nav class="day-tabs" id="dayTabs"></nav>
+
+    <div class="next-up pxl" id="nextUp"></div>
+
+    <div class="reminder-box pxl">
+      <div class="row1">
+        <span class="title">🔔 PENGINGAT</span>
+        <div class="switch" id="reminderSwitch"><div class="knob"></div></div>
+      </div>
+      <div class="sub">
+        <span>ingatkan</span>
+        <select id="reminderMinutes">
+          <option value="5">5 mnt</option>
+          <option value="10">10 mnt</option>
+          <option value="15" selected>15 mnt</option>
+          <option value="30">30 mnt</option>
+          <option value="1440">1 hari</option>
+        </select>
+        <span>sebelum</span>
+      </div>
+      <div class="status" id="reminderStatus">Nonaktif.</div>
+    </div>
+
+    <div class="note-badge pxl">
+      <span class="mark">[✓]</span>
+      <span>Tidak mengambil ECC semester ini — sudah lulus <b>ECC Level 4</b>.</span>
+    </div>
+  </aside>
+
+  <main class="stage">
+    <div class="day-head">
+      <div>
+        <h1 id="dayTitle">SENIN</h1>
+        <div class="sub" id="daySub">3 kelas terjadwal</div>
+      </div>
+      <div class="sks-total" id="daySksTotal"></div>
+    </div>
+
+    <div class="timeline" id="timeline"></div>
+
+    <section class="howto">
+      <h2>CARA PAKAI</h2>
+      <div class="cols">
+        <div class="block pxl">
+          <div class="htag">+ KALENDER → GOOGLE CALENDAR</div>
+          <ol>
+            <li>Ketuk tombol <b>+ Kalender</b> di kartu kelas mana pun.</li>
+            <li>Google Calendar terbuka, sudah terisi otomatis: nama mata kuliah, jam, ruang, dosen, dan diatur <b>berulang tiap minggu</b>.</li>
+            <li>Ketuk <b>Simpan</b> di sana. Selesai — cukup sekali per mata kuliah untuk satu semester.</li>
+            <li>Ulangi untuk mata kuliah lain yang mau ditambahkan (satu link = satu mata kuliah, batasan dari Google Calendar).</li>
+          </ol>
+        </div>
+        <div class="block pxl">
+          <div class="htag">🔔 PENGINGAT OTOMATIS</div>
+          <ol>
+            <li>Nyalakan sakelar <b>PENGINGAT</b> di sidebar kiri, lalu pilih 5/10/15/30 menit — atau <b>1 hari</b> sebelumnya — kamu mau diingatkan.</li>
+            <li>Izinkan notifikasi saat diminta.</li>
+            <li>Saat waktunya tiba, notifikasi otomatis muncul.</li>
+          </ol>
+          <div class="warn" id="reminderWarn">⚠ Pengingat ini hanya aktif selama tab halaman ini terbuka. Kalau tab/browser ditutup, pengingat tidak berbunyi — untuk itu tetap disarankan pakai "+ Kalender" di atas juga.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toastLayer"></div>
+
+<script>
+(function(){
+  var isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+
+  var SCHEDULE = [
+    { dow:1, name:"Senin", classes:[
+      { key:"pkn", start:"08:00", end:"09:40", course:"Pendidikan Kewarganegaraan", sks:2, dosen:"Dr. Drs. Aloysius Jondar, MSi.", room:"U-401" },
+      { key:"perkon", start:"10:30", end:"12:10", course:"Perilaku Konsumen", sks:2, dosen:"Amelia Agustina, S.Ds., M.Med.Kom.", room:"N-204" },
+      { key:"idn", start:"13:00", end:"15:30", course:"Inovasi Design Nusantara", sks:3, dosen:"Bonifacia Bulan Aruming Tyas, S.Ds, M.A.", room:"N-201" }
+    ]},
+    { dow:2, name:"Selasa", classes:[
+      { key:"packdes", start:"08:00", end:"10:30", course:"Packaging Design", sks:3, dosen:"Dr. Dra. Sufiana, M.Sn.", room:"E-502" },
+      { key:"sinema", start:"13:00", end:"15:30", course:"Sinematografi", sks:3, dosen:"Farah Fauziah, S.Hub.Int., M.A.", room:"E-305" }
+    ]},
+    { dow:3, name:"Rabu", classes:[
+      { key:"agama", start:"08:00", end:"09:40", course:"Agama Katolik", sks:2, dosen:"Drs. Y.S.D. Natha Utama", room:"N-110" }
+    ]},
+    { dow:4, name:"Kamis", classes:[
+      { key:"pemasaran", start:"08:00", end:"10:30", course:"Pemasaran Terpadu", sks:3, dosen:"Amelia Agustina, S.Ds., M.Med.Kom.", room:"N-302" },
+      { key:"umkm", start:"10:30", end:"13:00", course:"Umkm Branding", sks:3, dosen:"Bonifacia Bulan Aruming Tyas, S.Ds, M.A.", room:"E-301" }
+    ]},
+    { dow:5, name:"Jumat", classes:[] },
+    { dow:6, name:"Sabtu", classes:[] },
+    { dow:0, name:"Minggu", classes:[] }
+  ];
+  var ORDER = [1,2,3,4,5,6,0];
+  var BYDAY = {1:"MO",2:"TU",3:"WE",4:"TH",5:"FR",6:"SA",0:"SU"};
+
+  var NATIVE_IDS = {};
+  (function(){
+    var n = 100;
+    SCHEDULE.forEach(function(d){ d.classes.forEach(function(c){ NATIVE_IDS[c.key] = n++; }); });
+  })();
+
+  function toMin(t){ var p=t.split(":"); return (+p[0])*60 + (+p[1]); }
+  function pad2(n){ return n<10 ? "0"+n : ""+n; }
+  function fmtDur(mins){
+    var h=Math.floor(mins/60), m=mins%60;
+    if(h && m) return h+" jam "+m+" mnt";
+    if(h) return h+" jam";
+    return m+" mnt";
+  }
+  function todayStr(){
+    var d=new Date();
+    return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());
+  }
+
+  var byDow = {};
+  SCHEDULE.forEach(function(d){ byDow[d.dow]=d; });
+
+  var totalSks=0, hariKuliah=0;
+  SCHEDULE.forEach(function(d){
+    if(d.classes.length) hariKuliah++;
+    d.classes.forEach(function(c){ totalSks+=c.sks; });
+  });
+  document.getElementById("statSks").textContent = totalSks;
+  document.getElementById("statHari").textContent = hariKuliah;
+
+  var todayDow = new Date().getDay();
+  var activeDow = todayDow;
+
+  /* ---------- TASKS (localStorage) ---------- */
+  var TASK_KEY = "jadwal_tasks_v1";
+  function loadTasks(){
+    try{ return JSON.parse(localStorage.getItem(TASK_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function saveTasks(store){
+    try{ localStorage.setItem(TASK_KEY, JSON.stringify(store)); }catch(e){}
+  }
+  var tasksStore = loadTasks();
+
+  function getTasks(courseKey){ return tasksStore[courseKey] || []; }
+  function setTasks(courseKey, arr){ tasksStore[courseKey] = arr; saveTasks(tasksStore); }
+
+  function buildTaskSection(cls){
+    var wrap = document.createElement("div");
+    wrap.className = "tasks";
+    wrap.setAttribute("data-course-key", cls.key);
+
+    function refresh(){
+      var list = getTasks(cls.key);
+      var done = list.filter(function(t){return t.done;}).length;
+      wrap.innerHTML = "";
+
+      var thead = document.createElement("div");
+      thead.className = "thead";
+      thead.innerHTML = '<span class="label">TUGAS</span><span class="ratio vt">'+done+"/"+list.length+"</span>";
+      wrap.appendChild(thead);
+
+      if(!list.length){
+        var e = document.createElement("div");
+        e.className = "task-empty";
+        e.textContent = "Belum ada tugas. Tambahkan di bawah.";
+        wrap.appendChild(e);
+      } else {
+        var today = todayStr();
+        list.forEach(function(t){
+          var row = document.createElement("div");
+          row.className = "task-row" + (t.done ? " done" : "");
+          var chk = document.createElement("div");
+          chk.className = "pixel-check" + (t.done ? " done" : "");
+          chk.textContent = t.done ? "X" : "";
+          chk.addEventListener("click", function(){
+            t.done = !t.done;
+            setTasks(cls.key, list);
+            refresh();
+          });
+          row.appendChild(chk);
+
+          var txt = document.createElement("span");
+          txt.className = "task-text";
+          txt.textContent = t.text;
+          row.appendChild(txt);
+
+          if(t.due){
+            var due = document.createElement("span");
+            due.className = "task-due vt" + (!t.done && t.due < today ? " overdue" : "");
+            due.textContent = t.due;
+            row.appendChild(due);
+          }
+
+          var del = document.createElement("button");
+          del.className = "task-del";
+          del.setAttribute("aria-label","Hapus tugas");
+          del.textContent = "×";
+          del.addEventListener("click", function(){
+            setTasks(cls.key, list.filter(function(x){return x.id!==t.id;}));
+            refresh();
+          });
+          row.appendChild(del);
+
+          wrap.appendChild(row);
+        });
+      }
+
+      var addRow = document.createElement("div");
+      addRow.className = "task-add";
+      var input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "Tambah tugas...";
+      var dateInput = document.createElement("input");
+      dateInput.type = "date";
+      var addBtn = document.createElement("button");
+      addBtn.className = "pxl-btn small";
+      addBtn.textContent = "+ Tambah";
+
+      function doAdd(){
+        var v = input.value.trim();
+        if(!v) return;
+        var arr = getTasks(cls.key);
+        arr.push({ id: Date.now()+"-"+Math.random().toString(36).slice(2,7), text:v, due:dateInput.value||"", done:false });
+        setTasks(cls.key, arr);
+        refresh();
+      }
+      addBtn.addEventListener("click", doAdd);
+      input.addEventListener("keydown", function(ev){ if(ev.key==="Enter") doAdd(); });
+
+      addRow.appendChild(input);
+      addRow.appendChild(dateInput);
+      addRow.appendChild(addBtn);
+      wrap.appendChild(addRow);
+    }
+
+    refresh();
+    return wrap;
+  }
+
+  /* ---------- GOOGLE CALENDAR ---------- */
+  function nextOccurrence(dow, startHHMM){
+    var now = new Date();
+    var diff = (dow - now.getDay() + 7) % 7;
+    var d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    d.setDate(d.getDate() + diff);
+    var p = startHHMM.split(":");
+    d.setHours(+p[0], +p[1], 0, 0);
+    if(diff === 0 && d.getTime() <= now.getTime()){
+      d.setDate(d.getDate() + 7);
+    }
+    return d;
+  }
+  function toGCal(d){
+    return d.toISOString().replace(/[-:]/g,"").split(".")[0] + "Z";
+  }
+  function buildGCalUrl(dow, cls){
+    var start = nextOccurrence(dow, cls.start);
+    var end = new Date(start.getTime() + (toMin(cls.end)-toMin(cls.start))*60000);
+    var url = "https://calendar.google.com/calendar/render?action=TEMPLATE"
+      + "&text=" + encodeURIComponent(cls.course)
+      + "&dates=" + toGCal(start) + "/" + toGCal(end)
+      + "&details=" + encodeURIComponent("Dosen: " + cls.dosen)
+      + "&location=" + encodeURIComponent(cls.room)
+      + "&recur=RRULE:FREQ=WEEKLY;BYDAY=" + BYDAY[dow];
+    return url;
+  }
+
+  // On native, "+ Kalender" links must open in the system browser (Capacitor's Browser plugin)
+  // instead of navigating the app's own webview.
+  document.addEventListener("click", function(ev){
+    if(!isNative) return;
+    var a = ev.target.closest ? ev.target.closest("a.pxl-btn.accent") : null;
+    if(a && a.href){
+      ev.preventDefault();
+      try{ window.Capacitor.Plugins.Browser.open({ url: a.href }); }catch(e){}
+    }
+  });
+
+  /* ---------- REMINDERS ---------- */
+  var REM_KEY = "jadwal_reminder_v1";
+  function loadReminder(){
+    try{ return JSON.parse(localStorage.getItem(REM_KEY)) || {enabled:false, minutes:15, fired:[], date:""}; }
+    catch(e){ return {enabled:false, minutes:15, fired:[], date:""}; }
+  }
+  function saveReminder(){ try{ localStorage.setItem(REM_KEY, JSON.stringify(reminder)); }catch(e){} }
+  var reminder = loadReminder();
+
+  var swEl = document.getElementById("reminderSwitch");
+  var minEl = document.getElementById("reminderMinutes");
+  var statusEl = document.getElementById("reminderStatus");
+  var warnEl = document.getElementById("reminderWarn");
+
+  if(isNative && warnEl){
+    warnEl.className = "ok-note";
+    warnEl.textContent = "✓ Pengingat ini terjadwal langsung di sistem HP kamu — tetap muncul walau aplikasi ditutup.";
+  }
+
+  // Native: schedule real OS-level repeating notifications via Capacitor LocalNotifications.
+  // Works even when the app is closed, unlike the web Notification API.
+  function computeReminderFireTime(dow, startHHMM, minutesBefore){
+    var p = startHHMM.split(":");
+    var total = (+p[0])*60 + (+p[1]) - minutesBefore;
+    var dayShift = Math.floor(total / 1440);
+    var normMin = ((total % 1440) + 1440) % 1440;
+    var weekday = (((dow + dayShift) % 7) + 7) % 7 + 1; // 1=Sunday..7=Saturday
+    return { weekday: weekday, hour: Math.floor(normMin/60), minute: normMin%60 };
+  }
+
+  function scheduleNativeReminders(){
+    if(!isNative || !window.Capacitor.Plugins.LocalNotifications) return;
+    var LN = window.Capacitor.Plugins.LocalNotifications;
+    var allIds = [];
+    SCHEDULE.forEach(function(d){ d.classes.forEach(function(c){ allIds.push({ id: NATIVE_IDS[c.key] }); }); });
+
+    LN.cancel({ notifications: allIds }).catch(function(){}).then(function(){
+      if(!reminder.enabled) return;
+      var isDayBefore = reminder.minutes >= 1440;
+      var notifs = [];
+      SCHEDULE.forEach(function(d){
+        d.classes.forEach(function(c){
+          var t = computeReminderFireTime(d.dow, c.start, reminder.minutes);
+          notifs.push({
+            id: NATIVE_IDS[c.key],
+            title: isDayBefore ? ("Besok ada kelas: " + c.course) : ("Kelas sebentar lagi: " + c.course),
+            body: (isDayBefore ? "Besok, " : "") + c.start + "–" + c.end + " · " + c.room + " · " + c.dosen,
+            schedule: { on: { weekday: t.weekday, hour: t.hour, minute: t.minute }, allowWhileIdle: true }
+          });
+        });
+      });
+      if(notifs.length) LN.schedule({ notifications: notifs }).catch(function(){});
+    });
+  }
+
+  function renderReminderUI(){
+    swEl.className = "switch" + (reminder.enabled ? " on" : "");
+    minEl.value = reminder.minutes;
+
+    if(isNative){
+      if(!reminder.enabled){
+        statusEl.className = "status";
+        statusEl.textContent = "Nonaktif.";
+        return;
+      }
+      statusEl.className = "status ok";
+      statusEl.textContent = "Aktif — pengingat terjadwal di sistem, tetap jalan walau app ditutup.";
+      return;
+    }
+
+    if(!reminder.enabled){
+      statusEl.className = "status";
+      statusEl.textContent = "Nonaktif.";
+      return;
+    }
+    if(!("Notification" in window)){
+      statusEl.className = "status no";
+      statusEl.textContent = "Browser ini tak dukung notifikasi — pop-up di halaman tetap jalan.";
+    } else if(Notification.permission === "granted"){
+      statusEl.className = "status ok";
+      statusEl.textContent = "Aktif — notifikasi diizinkan.";
+    } else if(Notification.permission === "denied"){
+      statusEl.className = "status no";
+      statusEl.textContent = "Notifikasi diblokir browser — pop-up di halaman tetap jalan.";
+    } else {
+      statusEl.className = "status";
+      statusEl.textContent = "Aktif — pop-up di halaman jalan (izin notifikasi belum diberikan).";
+    }
+  }
+
+  swEl.addEventListener("click", function(){
+    reminder.enabled = !reminder.enabled;
+    saveReminder();
+
+    if(isNative){
+      if(reminder.enabled && window.Capacitor.Plugins.LocalNotifications){
+        window.Capacitor.Plugins.LocalNotifications.requestPermissions().then(function(){
+          renderReminderUI();
+          scheduleNativeReminders();
+        });
+      } else {
+        renderReminderUI();
+        scheduleNativeReminders();
+      }
+      return;
+    }
+
+    if(reminder.enabled && "Notification" in window && Notification.permission === "default"){
+      Notification.requestPermission().then(renderReminderUI);
+    }
+    renderReminderUI();
+  });
+  minEl.addEventListener("change", function(){
+    reminder.minutes = +minEl.value;
+    saveReminder();
+    if(isNative) scheduleNativeReminders();
+  });
+
+  function showToast(cls, isTomorrow){
+    var layer = document.getElementById("toastLayer");
+    var t = document.createElement("div");
+    t.className = "toast pxl";
+    t.style.borderColor = "var(--accent-3)";
+    var headline = isTomorrow ? "BESOK ADA KELAS!" : "SEBENTAR LAGI!";
+    t.innerHTML =
+      '<div class="t1"><span class="pulse"></span>'+headline+'</div>' +
+      '<div class="t2">' + cls.course + '</div>' +
+      '<div class="t3">' + (isTomorrow ? "Besok, " : "") + cls.start + '–' + cls.end + ' · ' + cls.room + '</div>';
+    layer.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 20000);
+
+    if("Notification" in window && Notification.permission === "granted"){
+      try{
+        new Notification((isTomorrow ? "Besok ada kelas: " : "Kelas sebentar lagi: ") + cls.course, {
+          body: (isTomorrow ? "Besok, " : "") + cls.start + "–" + cls.end + " · " + cls.room + " · " + cls.dosen
+        });
+      }catch(e){}
+    }
+  }
+
+  function pruneFired(){
+    var cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 3);
+    var cutoffStr = cutoff.getFullYear()+"-"+pad2(cutoff.getMonth()+1)+"-"+pad2(cutoff.getDate());
+    reminder.fired = reminder.fired.filter(function(id){ return id.split(":")[0] >= cutoffStr; });
+  }
+
+  function checkReminders(){
+    if(isNative) return; // native reminders are scheduled at the OS level instead
+    pruneFired();
+    if(!reminder.enabled) return;
+    var now = new Date();
+    [0,1].forEach(function(offset){
+      var dow = (now.getDay() + offset) % 7;
+      var d = byDow[dow];
+      if(!d || !d.classes.length) return;
+      var occDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
+      var occDateStr = occDate.getFullYear()+"-"+pad2(occDate.getMonth()+1)+"-"+pad2(occDate.getDate());
+      d.classes.forEach(function(c){
+        var p = c.start.split(":");
+        var startDT = new Date(occDate.getFullYear(), occDate.getMonth(), occDate.getDate(), +p[0], +p[1], 0);
+        var diffMin = (startDT.getTime() - now.getTime()) / 60000;
+        var fireId = occDateStr + ":" + c.key;
+        if(diffMin > 0 && diffMin <= reminder.minutes && reminder.fired.indexOf(fireId) === -1){
+          reminder.fired.push(fireId);
+          saveReminder();
+          showToast(c, offset === 1);
+        }
+      });
+    });
+  }
+
+  /* ---------- RENDER ---------- */
+  var tabsEl = document.getElementById("dayTabs");
+  function renderTabs(){
+    tabsEl.innerHTML = "";
+    ORDER.forEach(function(dow){
+      var d = byDow[dow];
+      var btn = document.createElement("button");
+      btn.className = "day-tab" + (d.classes.length ? " has-class" : "") + (dow===activeDow ? " active" : "") + (dow===todayDow ? " is-today" : "");
+      btn.innerHTML = '<span class="dot"></span><span class="name">'+d.name+(dow===todayDow ? '<span class="today-flag">HARI INI</span>' : '')+'</span><span class="count vt">'+(d.classes.length ? d.classes.length+"x" : "--")+'</span>';
+      btn.addEventListener("click", function(){ activeDow = dow; renderTabs(); renderDay(); });
+      tabsEl.appendChild(btn);
+    });
+  }
+
+  function computeNowState(dow, cls){
+    if(dow !== todayDow) return null;
+    var now = new Date();
+    var nowMin = now.getHours()*60 + now.getMinutes();
+    var s = toMin(cls.start), e = toMin(cls.end);
+    if(nowMin >= s && nowMin < e) return { ongoing:true, pct: Math.round(((nowMin-s)/(e-s))*100) };
+    return null;
+  }
+
+  function renderDay(){
+    var d = byDow[activeDow];
+    document.getElementById("dayTitle").textContent = d.name.toUpperCase();
+    var sub = document.getElementById("daySub");
+    var sksTotalEl = document.getElementById("daySksTotal");
+    var tl = document.getElementById("timeline");
+    tl.innerHTML = "";
+
+    if(!d.classes.length){
+      sub.textContent = "Tidak ada kelas terjadwal";
+      sksTotalEl.textContent = "";
+      var empty = document.createElement("div");
+      empty.className = "empty";
+      empty.innerHTML = '<div class="glyph">(-.-)</div><h2>HARI BEBAS KELAS</h2><p>Tidak ada mata kuliah pada hari '+d.name+'. Waktu bagus buat ngerjain tugas atau istirahat.</p>';
+      tl.appendChild(empty);
+      return;
+    }
+
+    var daySks = d.classes.reduce(function(a,c){return a+c.sks;},0);
+    sub.textContent = d.classes.length + " kelas terjadwal";
+    sksTotalEl.innerHTML = '<b>'+daySks+'</b> SKS hari ini';
+
+    d.classes.forEach(function(c){
+      var now = computeNowState(activeDow, c);
+      var card = document.createElement("div");
+      card.className = "pxl card" + (now ? " ongoing" : "");
+      card.setAttribute("data-course", c.key);
+      card.innerHTML =
+        '<div class="top"><span class="time-badge">'+c.start+'&ndash;'+c.end+'</span><span class="sks vt">'+c.sks+' SKS</span></div>'+
+        '<h3>'+c.course+'</h3>'+
+        '<div class="details">'+
+          '<span>@ <b>'+c.dosen+'</b></span>'+
+          '<span>#. <b>'+c.room+'</b></span>'+
+          '<span class="vt">~ '+fmtDur(toMin(c.end)-toMin(c.start))+'</span>'+
+        '</div>'+
+        '<div class="actions">'+
+          '<a class="pxl-btn accent" target="_blank" rel="noopener" href="'+buildGCalUrl(activeDow, c)+'">+ Kalender</a>'+
+        '</div>'+
+        '<div class="live-slot">'+(now ? '<div class="live-tag"><span class="pulse"></span>SEDANG BERLANGSUNG · '+now.pct+'%</div><div class="progress"><i style="width:'+now.pct+'%"></i></div>' : '')+'</div>';
+
+      card.appendChild(buildTaskSection(c));
+      tl.appendChild(card);
+    });
+  }
+
+  function renderNextUp(){
+    var now = new Date();
+    var nowMin = now.getHours()*60 + now.getMinutes();
+    var found=null, foundDow=null, offsetUsed=0;
+
+    outer:
+    for(var offset=0; offset<7; offset++){
+      var dow = (todayDow + offset) % 7;
+      var d = byDow[dow];
+      for(var i=0;i<d.classes.length;i++){
+        var c = d.classes[i];
+        if(offset===0 && toMin(c.end) <= nowMin) continue;
+        if(offset===0 && toMin(c.start) <= nowMin && nowMin < toMin(c.end)){
+          found=c; foundDow=dow; offsetUsed=0; break outer;
+        }
+        if(offset===0 && toMin(c.start) <= nowMin) continue;
+        found=c; foundDow=dow; offsetUsed=offset; break outer;
+      }
+    }
+
+    var el = document.getElementById("nextUp");
+    if(!found){ el.innerHTML = '<div class="tag">MINGGU INI</div><div class="course">Semua kelas selesai</div><div class="meta">Sampai jumpa minggu depan.</div>'; return; }
+
+    var isOngoing = offsetUsed===0 && toMin(found.start)<=nowMin && nowMin<toMin(found.end);
+    var dayLabel = offsetUsed===0 ? "HARI INI" : (offsetUsed===1 ? "BESOK" : byDow[foundDow].name.toUpperCase());
+
+    el.innerHTML =
+      '<div class="tag">'+(isOngoing ? '<span class="pulse"></span>BERLANGSUNG' : "SELANJUTNYA · "+dayLabel)+'</div>'+
+      '<div class="course">'+found.course+'</div>'+
+      '<div class="meta">'+found.start+'-'+found.end+' · '+found.room+'</div>';
+  }
+
+  function updateLive(){
+    renderNextUp();
+    checkReminders();
+    document.querySelectorAll(".card[data-course]").forEach(function(card){
+      var key = card.getAttribute("data-course");
+      var d = byDow[activeDow];
+      var cls = d.classes.filter(function(c){return c.key===key;})[0];
+      if(!cls) return;
+      var now = computeNowState(activeDow, cls);
+      card.classList.toggle("ongoing", !!now);
+      var slot = card.querySelector(".live-slot");
+      slot.innerHTML = now ? '<div class="live-tag"><span class="pulse"></span>SEDANG BERLANGSUNG · '+now.pct+'%</div><div class="progress"><i style="width:'+now.pct+'%"></i></div>' : "";
+    });
+  }
+
+  renderTabs();
+  renderDay();
+  renderNextUp();
+  renderReminderUI();
+  checkReminders();
+  if(isNative && reminder.enabled) scheduleNativeReminders();
+
+  setInterval(updateLive, 20000);
+})();
+</script>
+</body>
+</html>
